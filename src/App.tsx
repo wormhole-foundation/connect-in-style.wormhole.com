@@ -62,7 +62,7 @@ import {
 } from "./utils";
 
 export type Rpcs = {
-  [chain in ChainName]?: string;
+  [chain in Chain]?: string;
 };
 
 const MAINNET_TOKENS = Object.keys(MAINNET.tokens);
@@ -267,14 +267,14 @@ function App() {
   }, []);
   // END ROUTES
   // BEGIN ENV
-  const [env, setEnv] = useState<"testnet" | "mainnet">("mainnet");
-  const [selectedChains, setSelectedChains] = useState<ChainName[] | undefined>(
+  const [network, setNetwork] = useState<"Testnet" | "Mainnet">("Mainnet");
+  const [selectedChains, setSelectedChains] = useState<Chain[] | undefined>(
     undefined
   );
   const [_tokens, setTokens] = useState<string[] | undefined>(undefined);
   const [tokens] = useDebounce(_tokens, 1000);
   const [defaultFromNetwork, setDefaultFromNetwork] = useState<
-    ChainName | undefined
+    Chain | undefined
   >(undefined);
   const handleDefaultFromNetworkChange = useCallback((e: any) => {
     e.target.value
@@ -282,7 +282,7 @@ function App() {
       : setDefaultFromNetwork(undefined);
   }, []);
   const [defaultToNetwork, setDefaultToNetwork] = useState<
-    ChainName | undefined
+    Chain | undefined
   >(undefined);
   const handleDefaultToNetworkChange = useCallback((e: any) => {
     e.target.value
@@ -298,7 +298,7 @@ function App() {
       ? setDefaultToken(e.target.value)
       : setDefaultToken(undefined);
   }, []);
-  const [requiredNetwork, setRequiredNetwork] = useState<ChainName | undefined>(
+  const [requiredNetwork, setRequiredNetwork] = useState<Chain | undefined>(
     undefined
   );
   const handleRequiredNetworkChange = useCallback((e: any) => {
@@ -307,17 +307,17 @@ function App() {
       : setRequiredNetwork(undefined);
   }, []);
   // networks and tokens handlers come after defaults so they can appropriately reset them
-  const handleClearNetworks = useCallback(() => {
+  const handleClearChains = useCallback(() => {
     setSelectedChains(undefined);
   }, []);
-  const handleNoneNetworks = useCallback(() => {
+  const handleNoneChains = useCallback(() => {
     // clear defaults to avoid bugs (could be smarter)
     setDefaultFromNetwork(undefined);
     setDefaultToNetwork(undefined);
     setRequiredNetwork(undefined);
     setSelectedChains([]);
   }, []);
-  const handleNetworksChange = useCallback((e: any) => {
+  const handleChainsChange = useCallback((e: any) => {
     // clear defaults to avoid bugs (could be smarter)
     setDefaultFromNetwork(undefined);
     setDefaultToNetwork(undefined);
@@ -352,7 +352,7 @@ function App() {
   const rpcs = useMemo(() => {
     let valid: Rpcs = {};
     for (let key in _rpcs) {
-      let cn = key as ChainName;
+      let cn = key as Chain;
       if (isValidRpc(_rpcs[cn])) {
         valid[cn] = _rpcs[cn];
       }
@@ -374,8 +374,8 @@ function App() {
   const handleRpcsClose = useCallback(() => {
     setRpcsOpen(false);
   }, []);
-  const handleEnvChange = useCallback((e: any, value: string) => {
-    if (value === "testnet" || value === "mainnet") {
+  const handleNetworkChange = useCallback((e: any, value: string) => {
+    if (value === "testnet" || value === "Mainnet") {
       setTokens(undefined);
       setSelectedChains(undefined);
       setDefaultFromNetwork(undefined);
@@ -391,7 +391,7 @@ function App() {
         setHideConnect(true);
 
         setTimeout(() => {
-          setEnv(value);
+          setNetwork(value);
 
           setTimeout(() => {
             setHideConnect(false);
@@ -401,7 +401,7 @@ function App() {
     }
   }, []);
 
-  const chains = env === "mainnet" ? MAINNET.chains : TESTNET.chains;
+  const chains = network === "Mainnet" ? MAINNET.chains : TESTNET.chains;
 
   // END ENV
   // START BRIDGE COMPLETE
@@ -429,7 +429,7 @@ function App() {
     setSelectedChains(undefined);
     setTokens(undefined);
     setRpcs(undefined);
-    setEnv("testnet");
+    setNetwork("Testnet");
     setCtaText("");
     setCtaLink("");
     setPageHeader("");
@@ -447,16 +447,21 @@ function App() {
   // because otherwise the component did not update on changes
   const config: WormholeConnectConfig = useMemo(
     () => ({
-      env,
+      network,
       rpcs,
       tokens, // always testnet for the builder
-      cta:
-        ctaText && ctaLink
-          ? {
-              text: ctaText,
-              link: ctaLink,
-            }
-          : undefined,
+
+      ui: {
+        cta:
+          ctaText && ctaLink
+            ? {
+                text: ctaText,
+                link: ctaLink,
+              }
+            : undefined,
+        pageHeader,
+        showHamburgerMenu,
+      },
       bridgeDefaults:
         defaultFromNetwork ||
         defaultToNetwork ||
@@ -470,12 +475,10 @@ function App() {
             }
           : undefined,
       routes,
-      pageHeader,
-      networks: selectedChains,
-      showHamburgerMenu,
+      chains: selectedChains,
     }),
     [
-      env,
+      network,
       rpcs,
       tokens,
       selectedChains,
@@ -582,7 +585,7 @@ function App() {
                 <ScreenButton text="Palette" number={2} setScreen={setScreen} />
                 <ScreenButton text="Routes" number={3} setScreen={setScreen} />
                 <ScreenButton
-                  text="Networks & Assets"
+                  text="Chains & Tokens"
                   number={4}
                   setScreen={setScreen}
                 />
@@ -895,7 +898,7 @@ function App() {
                 onClick={backScreen}
                 sx={{ mb: 1, justifyContent: "flex-start", pl: 2 }}
               >
-                Networks & Assets
+                Chains & Tokens
               </Button>
               <Box mx={2}>
                 <Typography variant="h5" component="h2" mt={1.5} mb={2}>
@@ -903,17 +906,17 @@ function App() {
                 </Typography>
                 <RadioGroup
                   row
-                  value={env}
-                  onChange={handleEnvChange}
+                  value={network}
+                  onChange={handleNetworkChange}
                   sx={{ mb: 0.5 }}
                 >
                   <FormControlLabel
-                    value="testnet"
+                    value="Testnet"
                     control={<Radio />}
                     label="Testnet"
                   />
                   <FormControlLabel
-                    value="mainnet"
+                    value="Mainnet"
                     control={<Radio />}
                     label="Mainnet"
                   />
@@ -942,9 +945,9 @@ function App() {
                   <DialogTitle>Configure RPCs</DialogTitle>
                   <DialogContent>
                     {Object.keys(
-                      env === "testnet" ? TESTNET.chains : MAINNET.chains
+                      network === "Testnet" ? TESTNET.chains : MAINNET.chains
                     ).map((cn) => {
-                      const chain = cn as ChainName;
+                      const chain = cn as Chain;
                       return (
                         <TextField
                           key={chain}
@@ -954,20 +957,20 @@ function App() {
                           onChange={handleRpcChange}
                           error={
                             _rpcs?.[chain] &&
-                            !isValidRpc(_rpcs[chain as ChainName])
+                            !isValidRpc(_rpcs[chain as Chain])
                               ? true
                               : false
                           }
                           fullWidth
                           sx={{ mb: 2 }}
                           helperText={
-                            _rpcs?.[chain as ChainName] &&
-                            !isValidRpc(_rpcs[chain as ChainName])
+                            _rpcs?.[chain as Chain] &&
+                            !isValidRpc(_rpcs[chain as Chain])
                               ? "Unknown RPC string scheme. Expected an http or websocket URI."
                               : `Default: ${
-                                  (env === "mainnet"
-                                    ? MAINNET.rpcs[chain as ChainName]
-                                    : TESTNET.rpcs[chain as ChainName]) ||
+                                  (network === "Mainnet"
+                                    ? MAINNET.rpcs[chain as Chain]
+                                    : TESTNET.rpcs[chain as Chain]) ||
                                   "None"
                                 }`
                           }
@@ -983,18 +986,18 @@ function App() {
                 </Dialog>
                 <Divider sx={{ mt: 2 }} />
                 <Typography variant="h5" component="h2" mt={4} mb={2}>
-                  Networks
+                  Chains
                 </Typography>
                 <TextField
                   select
                   fullWidth
                   value={selectedChains || Object.keys(chains)}
-                  onChange={handleNetworksChange}
+                  onChange={handleChainsChange}
                   SelectProps={{
                     multiple: true,
                     renderValue: (selected: any) =>
                       !selectedChains
-                        ? "All Networks"
+                        ? "All Chains"
                         : selectedChains.join(", "),
                   }}
                 >
@@ -1003,7 +1006,7 @@ function App() {
                       <Checkbox
                         checked={
                           !selectedChains ||
-                          selectedChains.includes(chain as ChainName)
+                          selectedChains.includes(chain as Chain)
                         }
                       />
                       <ListItemText primary={chain} />
@@ -1011,7 +1014,7 @@ function App() {
                   ))}
                 </TextField>
                 <Button
-                  onClick={handleClearNetworks}
+                  onClick={handleClearChains}
                   variant="contained"
                   color="inherit"
                   size="small"
@@ -1020,7 +1023,7 @@ function App() {
                   Select All
                 </Button>
                 <Button
-                  onClick={handleNoneNetworks}
+                  onClick={handleNoneChains}
                   variant="contained"
                   color="inherit"
                   size="small"
@@ -1038,7 +1041,7 @@ function App() {
                   value={
                     _tokens
                       ? _tokens
-                      : env === "mainnet"
+                      : network === "Mainnet"
                       ? MAINNET_TOKENS
                       : TESTNET_TOKENS
                   }
@@ -1049,7 +1052,7 @@ function App() {
                       !_tokens ? "All Tokens" : selected.join(", "),
                   }}
                 >
-                  {(env === "mainnet" ? MAINNET_TOKENS : TESTNET_TOKENS).map(
+                  {(network === "Mainnet" ? MAINNET_TOKENS : TESTNET_TOKENS).map(
                     (t) => (
                       <MenuItem key={t} value={t}>
                         <Checkbox checked={!_tokens || _tokens.includes(t)} />
@@ -1149,7 +1152,7 @@ function App() {
                   <MenuItem value={""}>
                     <ListItemText primary="(None)" />
                   </MenuItem>
-                  {(env === "mainnet" ? MAINNET_TOKENS : TESTNET_TOKENS).map(
+                  {(network === "Mainnet" ? MAINNET_TOKENS : TESTNET_TOKENS).map(
                     (t) => (
                       <MenuItem key={t} value={t}>
                         <ListItemText primary={t} />
