@@ -34,8 +34,12 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+
+import {
+  Chain
+} from '@wormhole-foundation/sdk';
+
 import WormholeConnect, {
-  ChainName,
   WormholeConnectConfig,
   dark,
   MAINNET,
@@ -43,7 +47,7 @@ import WormholeConnect, {
 } from "@wormhole-foundation/wormhole-connect";
 import type { WormholeConnectPartialTheme } from "@wormhole-foundation/wormhole-connect";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import Background from "./Background";
 import ColorPicker from "./components/ColorPicker";
