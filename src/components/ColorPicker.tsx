@@ -3,36 +3,8 @@ import {
   WormholeConnectTheme,
   WormholeConnectPartialTheme,
 } from "@wormhole-foundation/wormhole-connect";
-import { useCallback, useMemo, useState } from "react";
-import {
-  Color,
-  ColorChangeHandler,
-  ColorResult,
-  SketchPicker,
-} from "react-color";
+import React, { useCallback, useMemo, useState } from "react";
 import { getObjectPath, setObjectPathImmutable } from "../utils";
-
-const colorToString = (color: ColorResult) =>
-  color.rgb.a === undefined
-    ? color.hex
-    : `rgba(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}, ${color.rgb.a})`;
-const stringToColor = (color: string): Color => {
-  if (color.startsWith("rgba(")) {
-    const [r, g, b, a] = color.slice(5, color.length - 1).split(",");
-    return { r: parseInt(r), g: parseInt(g), b: parseInt(b), a: parseFloat(a) };
-  }
-  return color;
-};
-
-function ColorPickerContent({
-  color,
-  onChange,
-}: {
-  color: Color;
-  onChange: ColorChangeHandler;
-}) {
-  return <SketchPicker color={color} onChange={onChange} />;
-}
 
 export default function ColorPicker({
   customTheme,
@@ -55,9 +27,9 @@ export default function ColorPicker({
     [customTheme, path, defaultTheme]
   );
   const handleColorChange = useCallback(
-    (color: ColorResult, event: any) => {
+    (color: string, event: any) => {
       setCustomTheme((prev) =>
-        setObjectPathImmutable(prev || defaultTheme, path, colorToString(color))
+        setObjectPathImmutable(prev || defaultTheme, path, color)
       );
     },
     [setCustomTheme, path, defaultTheme]
@@ -72,42 +44,9 @@ export default function ColorPicker({
   return (
     <ClickAwayListener onClickAway={handleClose}>
       <div style={{ display: "flex", alignItems: "center" }}>
-        <Tooltip
-          PopperProps={{
-            disablePortal: true,
-            sx: {
-              "& .MuiTooltip-tooltip": { padding: 0 },
-              "& .MuiTooltip-arrow": { color: "#ffffff" },
-            },
-          }}
-          onClose={handleClose}
-          open={open}
-          disableFocusListener
-          disableHoverListener
-          disableTouchListener
-          arrow
-          title={
-            <ColorPickerContent
-              color={stringToColor(color)}
-              onChange={handleColorChange}
-            />
-          }
-        >
-          <Button
-            onClick={handleOpen}
-            variant="contained"
-            color="inherit"
-            sx={{ padding: 0.5, minWidth: 0 }}
-          >
-            <Box
-              sx={{
-                height: 14,
-                width: 36,
-                backgroundColor: color,
-              }}
-            />
-          </Button>
-        </Tooltip>
+        <input type="color" value={color} onChange={(e) => {
+          handleColorChange(e.target.value, e);
+        }}/>
       </div>
     </ClickAwayListener>
   );

@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ROUTES, RouteInfo } from "../consts";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 
 export default function RouteCard({
   route,

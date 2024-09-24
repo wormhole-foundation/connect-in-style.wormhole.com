@@ -51,6 +51,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import Background from "./Background";
 import ColorPicker from "./components/ColorPicker";
+
 import RouteCard from "./components/RouteCard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ROUTE_INFOS } from "./consts";
@@ -213,9 +214,12 @@ function App() {
       };
     }
   }, [debouncedFontHref]);
-  const [customTheme, setCustomTheme] = useState<
+  const [_customTheme, setCustomTheme] = useState<
     WormholeConnectPartialTheme | undefined
   >(undefined);
+
+  const [customTheme] = useDebounce(_customTheme, 200);
+
   const [customThemeText, setCustomThemeText] = useState(defaultThemeJSON);
   // const [customThemeError, setCustomThemeError] = useState<boolean>(false);
   const handleModeChange = useCallback(

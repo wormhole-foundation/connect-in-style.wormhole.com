@@ -6,7 +6,7 @@ import path from "path";
 
 const resolve = {
   alias: {
-    components: path.resolve(__dirname, "./src/components"),
+    components: path.resolve(__dirname, "./src/components")
   },
 };
 
