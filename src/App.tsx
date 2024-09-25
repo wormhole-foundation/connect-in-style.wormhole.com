@@ -49,7 +49,6 @@ import type { WormholeConnectPartialTheme } from "@wormhole-foundation/wormhole-
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import Background from "./Background";
 import ColorPicker from "./components/ColorPicker";
 
 import RouteCard from "./components/RouteCard";
@@ -375,7 +374,7 @@ function App() {
     setRpcsOpen(false);
   }, []);
   const handleNetworkChange = useCallback((e: any, value: string) => {
-    if (value === "testnet" || value === "Mainnet") {
+    if (value === "Testnet" || value === "Mainnet") {
       setTokens(undefined);
       setSelectedChains(undefined);
       setDefaultFromNetwork(undefined);
@@ -461,19 +460,19 @@ function App() {
             : undefined,
         pageHeader,
         showHamburgerMenu,
+        bridgeDefaults:
+          defaultFromNetwork ||
+          defaultToNetwork ||
+          defaultToken ||
+          requiredNetwork
+            ? {
+                fromNetwork: defaultFromNetwork,
+                toNetwork: defaultToNetwork,
+                token: defaultToken,
+                requiredNetwork: requiredNetwork,
+              }
+            : undefined,
       },
-      bridgeDefaults:
-        defaultFromNetwork ||
-        defaultToNetwork ||
-        defaultToken ||
-        requiredNetwork
-          ? {
-              fromNetwork: defaultFromNetwork,
-              toNetwork: defaultToNetwork,
-              token: defaultToken,
-              requiredNetwork: requiredNetwork,
-            }
-          : undefined,
       routes,
       chains: selectedChains,
     }),
@@ -496,6 +495,20 @@ function App() {
 
   const [htmlCode, jsxCode] = useMemo(() => {
     const configString = JSON.stringify(config);
+
+    const v2UiString = JSON.stringify(config.ui);
+
+    const v2ConfigKeyValues = [];
+    if (config.network !== 'Mainnet') {
+      v2ConfigKeyValues.push(`"network": ${JSON.stringify(config.network)}`);
+    }
+
+    if (routes !== undefined) {
+      v2ConfigKeyValues.push(`"routes": [${routes.join(', ')}]`);
+    }
+
+    const configStringV2 = `{${v2ConfigKeyValues.join(', ')}}`;
+
     const themeStringHTML = customTheme
       ? ` data-theme='${JSON.stringify(customTheme)}'`
       : "";
@@ -511,9 +524,13 @@ function App() {
 
       // React version
       `import WormholeConnect from '@wormhole-foundation/wormhole-connect';
+
 function App() {
+
+  const config: WormholeConnectConfig = ${configStringV2};
+
   return (
-    <WormholeConnect config={${configString}}${themeStringJSX} />
+    <WormholeConnect config={config}${themeStringJSX} />
   );
 }`,
     ];
@@ -528,7 +545,7 @@ function App() {
   }, [codeType, htmlCode, jsxCode]);
   // END CODE
   return (
-    <Background>
+    <>
       <Box position="fixed" right="-4px" top="88px">
         <Button
           variant="contained"
@@ -1265,8 +1282,8 @@ function App() {
                   variant="fullWidth"
                   sx={{ backgroundColor: "rgba(255,255,255,0.1)" }}
                 >
-                  <Tab label="HTML" />
                   <Tab label="React JSX" />
+                  <Tab label="HTML" />
                 </Tabs>
                 <Card
                   sx={{
@@ -1302,7 +1319,7 @@ function App() {
                       },
                     }}
                   >
-                    <pre>{codeType === 0 ? htmlCode : jsxCode}</pre>
+                    <pre>{codeType === 0 ? jsxCode : htmlCode}</pre>
                   </Box>
                 </Card>
                 {fontHref ? (
@@ -1397,7 +1414,7 @@ function App() {
           <ErrorBoundary>
             {!hideConnect ? (
               <WormholeConnect
-                config={{ ...config, previewMode: true }}
+                config={config}
                 theme={customTheme}
                 key={JSON.stringify(config)}
               />
@@ -1407,7 +1424,7 @@ function App() {
           </ErrorBoundary>
         </Container>
       </Box>
-    </Background>
+    </>
   );
 }
 

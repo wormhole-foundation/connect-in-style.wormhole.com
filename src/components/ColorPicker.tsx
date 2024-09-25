@@ -1,9 +1,8 @@
-import { Box, Button, ClickAwayListener, Tooltip } from "@mui/material";
 import {
   WormholeConnectTheme,
   WormholeConnectPartialTheme,
 } from "@wormhole-foundation/wormhole-connect";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { getObjectPath, setObjectPathImmutable } from "../utils";
 
 export default function ColorPicker({
@@ -34,20 +33,11 @@ export default function ColorPicker({
     },
     [setCustomTheme, path, defaultTheme]
   );
-  const [open, setOpen] = useState<boolean>(false);
-  const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-  const handleClose = useCallback(() => {
-    setOpen(false);
-  }, []);
   return (
-    <ClickAwayListener onClickAway={handleClose}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <input type="color" value={color} onChange={(e) => {
-          handleColorChange(e.target.value, e);
-        }}/>
-      </div>
-    </ClickAwayListener>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <input type="color" value={color} onChange={(e) => {
+        handleColorChange(e.target.value, e);
+      }}/>
+    </div>
   );
 }

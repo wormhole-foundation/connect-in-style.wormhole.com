@@ -18,30 +18,31 @@ export type RouteInfo = {
 
 export const ROUTE_INFOS: RouteInfo[] = [
   {
-    key: "bridge",
+    key: "TokenBridgeRoute",
     title: "Token Bridge",
     description:
       "Lock-and-Mint bridging between all Wormhole supported chains.",
   },
   {
-    key: "relay",
+    key: "AutomaticTokenBridgeRoute",
     title: "Token Bridge Automatic Redeems",
     description:
       "Automatic redeems and native gas drop-off for the Token Bridge powered by xLabs.",
   },
   {
-    key: "cctpManual",
+    key: "CCTPRoute",
     title: "Circle CCTP",
     description:
       "Permissionlessly transfer native USDC cross-chain with CCTP + Wormhole.",
     link: "https://www.circle.com/en/cross-chain-transfer-protocol",
   },
   {
-    key: "cctpRelay",
+    key: "AutomaticCCTPRoute",
     title: "CCTP Automatic Redeems",
     description:
       "Automatic redeems and native gas drop-off for CCTP powered by xLabs.",
   },
+  /*
   {
     key: "cosmosGateway",
     title: "Gateway",
@@ -80,5 +81,6 @@ export const ROUTE_INFOS: RouteInfo[] = [
       "Automatic redeems for Native Token Transfers powered by xLabs.",
     link: "https://github.com/wormhole-foundation/example-native-token-transfers/blob/main/README.md",
   },
+  */
 ];
 export const ROUTES = ROUTE_INFOS.map((r) => r.key);
