@@ -95,6 +95,13 @@ export default () => {
 
   const [theme, setTheme] = useState<WormholeConnectPartialTheme>({});
 
+  // Hack
+  useEffect(() => {
+    if (theme.background) {
+      theme.background.default = 'transparent';
+    }
+  }, [theme]);
+
   // Parse user's config and handle any errors
   useEffect(() => {
     if (editingConfig) return;
