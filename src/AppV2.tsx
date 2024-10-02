@@ -274,14 +274,6 @@ const ThemeEditor = (props: { onChange: (theme: WormholeConnectPartialTheme) => 
     props.onChange(getTheme());
   }, [getTheme()]);
 
-  useEffect(() => {
-    if (mode === 'customDark') {
-      props.onChange(customDark);
-    } else if (mode === 'customLight') {
-      props.onChange(customLight);
-    }
-  }, [customLight, customDark]);
-
   const updateThemeProperty = (mutation: (theme: WormholeConnectPartialTheme) => void) => {
     const t = JSON.parse(JSON.stringify(theme));
     mutation(t);
