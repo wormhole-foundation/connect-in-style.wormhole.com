@@ -6,10 +6,14 @@ import * as prettier from 'prettier';
 import parserTypeScript from "prettier/plugins/typescript";
 import parserEstree from "prettier/plugins/estree";
 
-import { Alert, Box, Grid, Typography, Button } from '@mui/material';
+import { TextField, Alert, Box, Grid, Typography, Button, Radio, RadioGroup, FormControlLabel } from '@mui/material';
 
 import WormholeConnect, {
+  dark,
+  light,
   WormholeConnectConfig,
+  WormholeConnectPartialTheme,
+  buildConfig,
   /* @ts-ignore */
   DEFAULT_ROUTES,
   /* @ts-ignore */
@@ -71,6 +75,9 @@ const useStyles = makeStyles()(() => {
       borderRadius: '3px',
       padding: '2px',
       background: WORMHOLE_PURPLE_SUBTLE,
+    },
+    colorPicker: {
+      height: '40px',
     }
   }
 });
@@ -85,6 +92,8 @@ export default () => {
   const [configErr, setConfigErr] = useState<string | undefined >(undefined);
   const [configSuggestions, setConfigSuggestions] = useState<ConfigSuggestion[]>([]);
   const [nonce, setNonce] = useState(1);
+
+  const [theme, setTheme] = useState<WormholeConnectPartialTheme>({});
 
   // Parse user's config and handle any errors
   useEffect(() => {
@@ -119,7 +128,7 @@ export default () => {
     try {
       const configEvaled = eval(`(${configCode || '{}'})`);
       setConfig(configEvaled);
-      // buildConfig(configEvaled);
+      buildConfig(configEvaled);
       setConfigErr(undefined);
       setNonce(nonce+1);
 
@@ -142,8 +151,6 @@ export default () => {
     setConfigSuggestions(suggestions);
   }, [editingConfig]);
 
-  console.log(config, nonce);
-
   /* @ts-ignore */
   const configWithCacheBust = { ...config, cacheBust: nonce };
 
@@ -161,7 +168,7 @@ export default () => {
         <Grid item xs={6} >
           <Typography color={WORMHOLE_PURPLE} marginLeft={1}>Preview</Typography>
           <Box className={styles.classes.wormbin}>
-            { <WormholeConnect config={configWithCacheBust} key={nonce} /> }
+            <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
           </Box>
         </Grid>
         <Grid item xs={6}>
@@ -188,7 +195,7 @@ export default () => {
             </Editor>
 
             {
-              //configCode === '{}' ? null :
+              configCode === '{}' ? null :
               configErr ? 
                 <Alert severity="error">Error parsing config: {configErr}</Alert> : 
               configSuggestions.length === 0 ?
@@ -198,6 +205,10 @@ export default () => {
           </Box>
           <Typography color={WORMHOLE_PURPLE} marginLeft={1} marginTop={4}>Theme</Typography>
           <Box className={styles.classes.wormbin}>
+            <ThemeEditor onChange={(theme: WormholeConnectPartialTheme) => {
+              console.log(theme, 'updated');
+              setTheme(theme);
+            }} />
           </Box>
         </Grid>
       </Grid>
@@ -227,3 +238,126 @@ const Suggestion = (props: ConfigSuggestion) => {
   }
   </> 
 };
+
+
+// rg -o --no-line-number --no-filename "palette.[\w\.]+" | sort | uniq
+
+const ThemeEditor = (props: { onChange: (theme: WormholeConnectPartialTheme) => void }) => {
+  const [mode, setMode] = useState('customDark');
+  const [customLight, setCustomLight] = useState(JSON.parse(JSON.stringify(light)));
+  const [customDark, setCustomDark] = useState(JSON.parse(JSON.stringify(dark)));
+  const [theme, setTheme] = useState(customDark);
+
+  const getTheme = () => {
+    switch (mode) {
+      case 'dark': return dark;
+      case 'light': return light;
+      case 'customDark': return customDark;
+      case 'customLight': return customLight;
+    }
+  };
+
+  useEffect(() => {
+    if (mode === 'dark') {
+      setTheme(dark);
+    } else if (mode === 'light') {
+      setTheme(light);
+    } else if (mode === 'customDark') {
+      setTheme(customDark);
+    } else if (mode === 'customLight') {
+      setTheme(customLight);
+    }
+  }, [mode]);
+
+  useEffect(() => {
+    props.onChange(getTheme());
+  }, [getTheme()]);
+
+  useEffect(() => {
+    if (mode === 'customDark') {
+      props.onChange(customDark);
+    } else if (mode === 'customLight') {
+      props.onChange(customLight);
+    }
+  }, [customLight, customDark]);
+
+  const updateThemeProperty = (mutation: (theme: WormholeConnectPartialTheme) => void) => {
+    const t = JSON.parse(JSON.stringify(theme));
+    mutation(t);
+    if (mode === 'customDark') {
+      setCustomDark(t);
+    } else if (mode === 'customLight') {
+      setCustomLight(t);
+    }
+    setTheme(t);
+  };
+
+  return <>
+    <RadioGroup
+      row
+      value={mode}
+      onChange={(e: any) => {
+        setMode(e.target.value);
+      }}
+      sx={{ mb: 2 }}
+    >
+      <FormControlLabel
+        value="customDark"
+        control={<Radio />}
+        label="Dark"
+      />
+      <FormControlLabel
+        value="customLight"
+        control={<Radio />}
+        label="Light"
+      />
+      <FormControlLabel
+        value="dark"
+        control={<Radio />}
+        label="Dark (Built-in)"
+      />
+      <FormControlLabel
+        value="light"
+        control={<Radio />}
+        label="Light (Built-in)"
+      />
+    </RadioGroup>
+
+    { mode.startsWith('custom') ? <>
+      <ColorPicker id="bg" label="Background" value={(getTheme()).background.default} onChange={(val) => 
+        updateThemeProperty((t) => { t.background!.default = val })
+      } />
+
+      <ColorPicker id="modal" label="Modal" value={(getTheme()).modal.background} onChange={(val) =>
+        updateThemeProperty((t) => { t.modal!.background = val })
+      } />
+
+      <ColorPicker id="card" label="Card" value={(getTheme()).card.background} onChange={(val) =>
+        updateThemeProperty((t) => { t.card!.background = val })
+      } />
+
+      <ColorPicker id="textPrimary" label="Text (Primary)" value={(getTheme()).text.primary} onChange={(val) =>
+        updateThemeProperty((t) => { t.text!.primary = val })
+      } />
+
+      <ColorPicker id="textSecondary" label="Text (Secondary)" value={(getTheme()).text.secondary} onChange={(val) =>
+        updateThemeProperty((t) => { t.text!.secondary = val })
+      } />
+    </> : null }
+  </>
+}
+
+const ColorPicker = (props: { id: string, label: string, value: string, onChange: (string) => void }) => {
+  const styles = useStyles();
+
+  return <Box display="flex" sx={{alignItems: 'center'}}>
+    <input className={styles.classes.colorPicker} id={props.id} type="color" value={props.value} onChange={(e: any) => {
+      props.onChange(e.target.value);
+    }} style={{marginRight: '10px'}} />
+
+    <TextField variant="standard" sx={{width: '80px'}} value={props.value} onChange={(e) => props.onChange(e.target.value)} />
+
+    <label style={{marginRight: '14px', cursor: 'pointer'}} htmlFor={props.id}>{props.label}</label>
+
+    </Box>
+}
