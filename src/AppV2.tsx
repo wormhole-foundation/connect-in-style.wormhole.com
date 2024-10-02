@@ -167,7 +167,9 @@ export default () => {
       <Grid container spacing={2}>
         <Grid item xs={6} >
           <Typography color={WORMHOLE_PURPLE} marginLeft={1}>Preview</Typography>
-          <Box className={styles.classes.wormbin}>
+          <Box className={styles.classes.wormbin} sx={{
+            background: theme.mode === 'dark' ? 'black' : 'white'
+          }}>
             <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
           </Box>
         </Grid>
@@ -206,7 +208,6 @@ export default () => {
           <Typography color={WORMHOLE_PURPLE} marginLeft={1} marginTop={4}>Theme</Typography>
           <Box className={styles.classes.wormbin}>
             <ThemeEditor onChange={(theme: WormholeConnectPartialTheme) => {
-              console.log(theme, 'updated');
               setTheme(theme);
             }} />
           </Box>
@@ -324,16 +325,16 @@ const ThemeEditor = (props: { onChange: (theme: WormholeConnectPartialTheme) => 
     </RadioGroup>
 
     { mode.startsWith('custom') ? <>
-      <ColorPicker id="bg" label="Background" value={(getTheme()).background.default} onChange={(val) => 
-        updateThemeProperty((t) => { t.background!.default = val })
+      <ColorPicker id="primary" label="Primary" value={(getTheme()).primary[500]} onChange={(val) =>
+        updateThemeProperty((t) => { t.primary![500] = val })
       } />
 
-      <ColorPicker id="modal" label="Modal" value={(getTheme()).modal.background} onChange={(val) =>
+      <ColorPicker id="modal" label="Modal / Input" value={(getTheme()).modal.background} onChange={(val) =>
         updateThemeProperty((t) => { t.modal!.background = val })
       } />
 
-      <ColorPicker id="card" label="Card" value={(getTheme()).card.background} onChange={(val) =>
-        updateThemeProperty((t) => { t.card!.background = val })
+      <ColorPicker id="badges" label="Chain Badges" value={(getTheme()).background.badge} onChange={(val) =>
+        updateThemeProperty((t) => { t.background!.badge = val })
       } />
 
       <ColorPicker id="textPrimary" label="Text (Primary)" value={(getTheme()).text.primary} onChange={(val) =>
@@ -343,6 +344,15 @@ const ThemeEditor = (props: { onChange: (theme: WormholeConnectPartialTheme) => 
       <ColorPicker id="textSecondary" label="Text (Secondary)" value={(getTheme()).text.secondary} onChange={(val) =>
         updateThemeProperty((t) => { t.text!.secondary = val })
       } />
+
+      <ColorPicker id="error" label="Success" value={(getTheme()).success[500]} onChange={(val) =>
+        updateThemeProperty((t) => { t.success![500] = val })
+      } />
+
+      <ColorPicker id="error" label="Error" value={(getTheme()).error[500]} onChange={(val) =>
+        updateThemeProperty((t) => { t.error![500] = val })
+      } />
+
     </> : null }
   </>
 }
