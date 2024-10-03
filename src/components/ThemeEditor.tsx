@@ -7,13 +7,26 @@ import {
   WormholeConnectPartialTheme,
 } from '@wormhole-foundation/wormhole-connect';
 
-
 import { Radio, RadioGroup, FormControlLabel } from '@mui/material';
 
+const loadCustomTheme = (mode: string) => {
+  const key = `connect-editor:custom-theme-${mode}`;
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+  return JSON.parse(JSON.stringify((mode === 'customDark' ? dark : light)))
+}
+
+const saveCustomTheme = (mode: string, theme: WormholeConnectPartialTheme) => {
+  const key = `connect-editor:custom-theme-${mode}`;
+  localStorage.setItem(key, JSON.stringify(theme));
+}
+
 export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void }) => {
-  const [mode, setMode] = useState('customDark');
-  const [customLight, setCustomLight] = useState(JSON.parse(JSON.stringify(light)));
-  const [customDark, setCustomDark] = useState(JSON.parse(JSON.stringify(dark)));
+  const [mode, setMode] = useState(localStorage.getItem('connect-editor:mode') ?? 'customDark');
+  const [customDark, setCustomDark] = useState(loadCustomTheme('customDark'));
+  const [customLight, setCustomLight] = useState(loadCustomTheme('customLight'));
   const [theme, setTheme] = useState(customDark);
 
   const getTheme = () => {
@@ -23,6 +36,7 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
       case 'customDark': return customDark;
       case 'customLight': return customLight;
     }
+    return dark;
   };
 
   useEffect(() => {
@@ -38,7 +52,10 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
   }, [mode]);
 
   useEffect(() => {
+    const t = getTheme();
+    t.background.default = 'transparent';
     props.onChange(getTheme());
+    saveCustomTheme(mode, getTheme());
   }, [getTheme()]);
 
   const updateThemeProperty = (mutation: (theme: WormholeConnectPartialTheme) => void) => {
@@ -52,12 +69,15 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
     setTheme(t);
   };
 
+  if (!getTheme().primary) debugger;
+
   return <>
     <RadioGroup
       row
       value={mode}
       onChange={(e: any) => {
         setMode(e.target.value);
+        localStorage.setItem('connect-editor:mode', e.target.value);
       }}
       sx={{ mb: 2 }}
     >

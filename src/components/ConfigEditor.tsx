@@ -9,6 +9,8 @@ import { Alert, Button  } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import * as prettier from 'prettier';
 
+const LOCAL_STORAGE_KEY = 'connect-editor:config-code';
+
 import {
   WormholeConnectConfig,
   buildConfig,
@@ -70,11 +72,28 @@ interface ConfigSuggestion {
   example: string;
 }
 
+const formatCode = async (code): Promise<string> => {
+  return prettier.format(code, {
+    semi: false,
+    parser: "typescript",
+    plugins: [parserTypeScript, parserEstree]
+  })
+}
+
 export default (props: { onChange: (config: WormholeConnectConfig) => void }) => {
-  const [configCode, setConfigCode] = useState('{}');
+  const [configCode, setConfigCode] = useState('');
   const [editingConfig, setEditingConfig] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [configErr, setConfigErr] = useState<string | undefined>(undefined);
   const [configSuggestions, setConfigSuggestions] = useState<ConfigSuggestion[]>([]);
+
+  useEffect(() => {
+    const initialCode = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}';
+    formatCode(initialCode).then((code) => {
+      setConfigCode(code);
+      setLoading(false);
+    });
+  }, []);
 
   const styles = useStyles();
 
@@ -125,13 +144,16 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
 
       props.onChange(configEvaled);
       setConfigErr(undefined);
+
+      if (configCode !== '') {
+        localStorage.setItem(LOCAL_STORAGE_KEY, configCode);
+      }
     } catch (e: any) {
       setConfigErr(e.toString());
     }
 
-
     setConfigSuggestions(suggestions);
-  }, [editingConfig]);
+  }, [editingConfig, loading]);
 
 
 
@@ -146,11 +168,7 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
       onFocus={() => setEditingConfig(true)}
       onBlur={() => {
         setEditingConfig(false);
-        prettier.format(configCode, {
-          semi: false,
-          parser: "typescript",
-          plugins: [parserTypeScript, parserEstree]
-        }).then(setConfigCode);
+        formatCode(configCode).then(setConfigCode);
       }}
       highlight={code => highlight(code, languages.js, 'js')}
       padding={10}

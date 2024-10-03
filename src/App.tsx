@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { Box, Grid, Typography, Tabs, Tab } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
@@ -20,6 +20,14 @@ const useStyles = makeStyles()(() => {
   }
 });
 
+const getInitialTheme = () => {
+  const cached = localStorage.getItem('connect-editor:theme')
+  if (cached) {
+    return JSON.parse(cached);
+  }
+  return dark;
+};
+
 export default () => {
 
   const styles = useStyles();
@@ -29,14 +37,7 @@ export default () => {
 
   const [editorTab, setEditorTab] = useState(0);
 
-  const [theme, setTheme] = useState<WormholeConnectPartialTheme>(dark);
-
-  // Hack
-  useEffect(() => {
-    if (theme.background) {
-      theme.background.default = 'transparent';
-    }
-  }, [theme]);
+  const [theme, setTheme] = useState<WormholeConnectPartialTheme>(getInitialTheme());
 
   /* @ts-ignore */
   const configWithCacheBust = useMemo(() => {
@@ -80,6 +81,7 @@ export default () => {
               }} /> :
               <ThemeEditor onChange={(theme: WormholeConnectPartialTheme) => {
                 setTheme(theme);
+                localStorage.setItem('connect-editor:theme', JSON.stringify(theme));
               }} />
             }
           </Box>
