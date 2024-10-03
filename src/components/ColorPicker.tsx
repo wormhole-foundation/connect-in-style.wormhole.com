@@ -1,43 +1,14 @@
-import {
-  WormholeConnectTheme,
-  WormholeConnectPartialTheme,
-} from "@wormhole-foundation/wormhole-connect";
-import React, { useCallback, useMemo } from "react";
-import { getObjectPath, setObjectPathImmutable } from "../utils";
+import React from 'react';
+import { Box, TextField } from '@mui/material';
 
-export default function ColorPicker({
-  customTheme,
-  setCustomTheme,
-  path,
-  defaultTheme,
-}: {
-  customTheme: WormholeConnectPartialTheme | undefined;
-  setCustomTheme: React.Dispatch<
-    React.SetStateAction<WormholeConnectPartialTheme | undefined>
-  >;
-  path: string;
-  defaultTheme: WormholeConnectTheme;
-}) {
-  const color = useMemo(
-    () =>
-      getObjectPath(customTheme, path) ||
-      getObjectPath(defaultTheme, path) ||
-      "#ffffff",
-    [customTheme, path, defaultTheme]
-  );
-  const handleColorChange = useCallback(
-    (color: string, event: any) => {
-      setCustomTheme((prev) =>
-        setObjectPathImmutable(prev || defaultTheme, path, color)
-      );
-    },
-    [setCustomTheme, path, defaultTheme]
-  );
-  return (
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <input type="color" value={color} onChange={(e) => {
-        handleColorChange(e.target.value, e);
-      }}/>
-    </div>
-  );
+export default (props: { id: string, label: string, value: string, onChange: (string) => void }) => {
+  return <Box display="flex" sx={{alignItems: 'center'}}>
+    <input style={{height:'40px', marginRight: '10px'}} id={props.id} type="color" value={props.value} onChange={(e: any) => {
+      props.onChange(e.target.value);
+    }} />
+
+    <TextField variant="standard" sx={{width: '80px'}} value={props.value} onChange={(e) => props.onChange(e.target.value)} />
+
+    <label style={{marginRight: '14px', cursor: 'pointer'}} htmlFor={props.id}>{props.label}</label>
+  </Box>
 }
