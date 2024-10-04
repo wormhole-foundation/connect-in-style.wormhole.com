@@ -6,6 +6,7 @@ import { makeStyles } from 'tss-react/mui';
 import Tab from './components/Tab';
 import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
+import OutputCode from './components/OutputCode';
 
 import WormholeConnect, { WormholeConnectConfig, WormholeConnectPartialTheme, dark } from '@wormhole-foundation/wormhole-connect';
 
@@ -34,9 +35,11 @@ export default () => {
   const styles = useStyles();
 
   const [config, setConfig] = useState<WormholeConnectConfig >({});
+  const [configCode, setConfigCode] = useState<string >('{}');
   const [nonce, setNonce] = useState(1);
 
   const [editorTab, setEditorTab] = useState<'config' | 'theme'>('config');
+  const [outputCodeType, setOutputCodeType] = useState<'react' | 'hosted'>('react');
 
   const [theme, setTheme] = useState<WormholeConnectPartialTheme>(getInitialTheme());
 
@@ -68,12 +71,12 @@ export default () => {
           <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
           <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
           
-          <Box className={styles.classes.wormbin}>
-
+          <Box className={styles.classes.wormbin} marginBottom={2}>
             {
               editorTab === 'config' ?
-              <ConfigEditor onChange={(config) => {
+              <ConfigEditor onChange={(config, configCode) => {
                 setConfig(config);
+                setConfigCode(configCode);
                 setNonce(nonce+1);
               }} /> :
               <ThemeEditor onChange={(theme: WormholeConnectPartialTheme) => {
@@ -82,6 +85,14 @@ export default () => {
               }} />
             }
           </Box>
+
+          <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
+          <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
+
+          <Box className={styles.classes.wormbin}>
+            <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
+          </Box>
+
         </Grid>
       </Grid>
     </Box>

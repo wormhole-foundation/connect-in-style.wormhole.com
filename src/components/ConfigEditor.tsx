@@ -1,15 +1,16 @@
-import Editor from 'react-simple-code-editor';
 import React, { useState, useEffect } from 'react';
+import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs';
 import './editor.css'; //Example style, you can use another
 import parserTypeScript from "prettier/plugins/typescript";
 import parserEstree from "prettier/plugins/estree";
 
 import { Box, Button, Typography  } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
+import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { makeStyles } from 'tss-react/mui';
 import * as prettier from 'prettier';
+import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
 
 const LOCAL_STORAGE_KEY = 'connect-editor:config-code';
 
@@ -37,8 +38,6 @@ import {
   /* @ts-ignore */
   MayanRouteSWIFT,
 }  from '@wormhole-foundation/wormhole-connect';
-
-import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
 
 const useStyles = makeStyles()(() => {
   return {
@@ -78,7 +77,7 @@ const formatCode = async (code): Promise<string> => {
   })
 }
 
-export default (props: { onChange: (config: WormholeConnectConfig) => void }) => {
+export default (props: { onChange: (config: WormholeConnectConfig, code: string) => void }) => {
   const [config, setConfig] = useState<WormholeConnectConfig>({});
   const [configCode, setConfigCode] = useState('');
   const [editingConfig, setEditingConfig] = useState(false);
@@ -87,7 +86,11 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
 
   useEffect(() => {
     const initialCode = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}';
-    setConfigCode(initialCode);
+
+    formatCode(initialCode).then(setConfigCode).catch(() => {
+      setConfigCode(initialCode);
+    });
+
     setLoading(false);
   }, []);
 
@@ -122,10 +125,11 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
 
     try {
       const configEvaled = eval(`(${configCode || '{}'})`);
+      validateConfig(configEvaled);
       buildConfig(configEvaled);
 
-     setConfig(configEvaled);
-      props.onChange(configEvaled);
+      setConfig(configEvaled);
+      props.onChange(configEvaled, configCode);
       setConfigErr(undefined);
 
       if (configCode !== '') {
@@ -156,9 +160,8 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
     </Editor>
 
     {
-      configCode === '{}' ? null :
       configErr ? 
-        <Typography margin="10px 0" variant="h6" color="error.main">Error parsing config: {configErr}</Typography> :
+        <Typography margin="10px 0" variant="h6" color="error.main">{configErr}</Typography> :
         <Typography margin="10px 0" variant="h6" color="success.main">Config is valid</Typography>
     }
 
@@ -230,8 +233,8 @@ const CommonProperty = (props: { config: WormholeConnectConfig, data: CommonProp
     <>
       <Box display="flex" alignItems="center" margin="5px 0">
         {props.config[props.data.key] !== undefined ?
-          <CheckIcon fontSize="small" color="success" /> :
-          <MoreHorizOutlinedIcon  fontSize="small" color="warning" />
+          <CheckBoxOutlinedIcon fontSize="small" color="success" /> :
+          <CheckBoxOutlineBlankOutlinedIcon  fontSize="small" color="primary" />
         }
         <code className={styles.classes.smolCode}>{props.data.key}</code> - {props.data.description}
 
@@ -249,3 +252,12 @@ const CommonProperty = (props: { config: WormholeConnectConfig, data: CommonProp
     </>
   )
 };
+
+const validateConfig = (config: WormholeConnectConfig) => {
+  if (config.routes?.length === 0) {
+    throw new Error(`Routes list is empty. Connect needs at least one route.`);
+  }
+  if (config.chains && config.chains.length < 2) {
+    throw new Error(`Chains list too short. Connect needs at least two chains.`);
+  }
+}
