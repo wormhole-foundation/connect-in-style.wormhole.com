@@ -1,11 +1,13 @@
 import Editor from 'react-simple-code-editor';
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { highlight, languages } from 'prismjs';
 import './editor.css'; //Example style, you can use another
 import parserTypeScript from "prettier/plugins/typescript";
 import parserEstree from "prettier/plugins/estree";
 
-import { Alert, Button  } from '@mui/material';
+import { Box, Button, Typography  } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import { makeStyles } from 'tss-react/mui';
 import * as prettier from 'prettier';
 
@@ -36,7 +38,7 @@ import {
   MayanRouteSWIFT,
 }  from '@wormhole-foundation/wormhole-connect';
 
-const WORMHOLE_PURPLE_SUBTLE = 'rgb(192, 186, 245, 0.5)';
+import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
 
 const useStyles = makeStyles()(() => {
   return {
@@ -60,39 +62,33 @@ const useStyles = makeStyles()(() => {
       color: 'white',
     },
     smolCode: {
+      color: '#268bd2',
       borderRadius: '3px',
       padding: '2px',
-      background: WORMHOLE_PURPLE_SUBTLE,
     },
   }
 });
-
-interface ConfigSuggestion {
-  text: ReactElement;
-  example: string;
-}
 
 const formatCode = async (code): Promise<string> => {
   return prettier.format(code, {
     semi: false,
     parser: "typescript",
+    trailingComma: 'none',
     plugins: [parserTypeScript, parserEstree]
   })
 }
 
 export default (props: { onChange: (config: WormholeConnectConfig) => void }) => {
+  const [config, setConfig] = useState<WormholeConnectConfig>({});
   const [configCode, setConfigCode] = useState('');
   const [editingConfig, setEditingConfig] = useState(false);
   const [loading, setLoading] = useState(true);
   const [configErr, setConfigErr] = useState<string | undefined>(undefined);
-  const [configSuggestions, setConfigSuggestions] = useState<ConfigSuggestion[]>([]);
 
   useEffect(() => {
     const initialCode = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}';
-    formatCode(initialCode).then((code) => {
-      setConfigCode(code);
-      setLoading(false);
-    });
+    setConfigCode(initialCode);
+    setLoading(false);
   }, []);
 
   const styles = useStyles();
@@ -124,24 +120,11 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
     /* @ts-ignore */
     window.MayanRouteSWIFT = MayanRouteSWIFT;
 
-    const suggestions: ConfigSuggestion[] = [];
-
     try {
       const configEvaled = eval(`(${configCode || '{}'})`);
       buildConfig(configEvaled);
 
-      if (!configEvaled.rpcs) {
-        suggestions.push({
-          text: <>Connect requires RPC endpoints to work well. Add these as <code className={styles.classes.smolCode}>rpcs</code>.</>, 
-          example: `{
-  rpcs: {
-    Solana: "https://...",
-    Ethereum: "https://...",
-  }
-}`,
-        });
-      }
-
+     setConfig(configEvaled);
       props.onChange(configEvaled);
       setConfigErr(undefined);
 
@@ -152,10 +135,7 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
       setConfigErr(e.toString());
     }
 
-    setConfigSuggestions(suggestions);
   }, [editingConfig, loading]);
-
-
 
 
   return <>
@@ -178,36 +158,94 @@ export default (props: { onChange: (config: WormholeConnectConfig) => void }) =>
     {
       configCode === '{}' ? null :
       configErr ? 
-        <Alert severity="error">Error parsing config: {configErr}</Alert> : 
-      configSuggestions.length === 0 ?
-        <Alert severity="success">Config is valid</Alert>:
-      configSuggestions.map((suggestion) => <Suggestion {...suggestion} />)
+        <Typography margin="10px 0" variant="h6" color="error.main">Error parsing config: {configErr}</Typography> :
+        <Typography margin="10px 0" variant="h6" color="success.main">Config is valid</Typography>
     }
+
+    <CommonProperties config={config} />
   </>
 }
 
-const Suggestion = (props: ConfigSuggestion) => {
+interface CommonPropertyData {
+  key: string;
+  description: string;
+  example: string;
+}
+
+const COMMON_PROPERTIES: CommonPropertyData[] = [
+  {
+    key: 'rpcs',
+    description: `RPC endpoints for the chains you're using Connect for`,
+    example: `{
+  rpcs: {
+    Solana: 'https://...',
+    Ethereum: 'https://...'
+  }
+}`
+  },
+  {
+    key: 'routes',
+    description: `Which routes/protocols you want Connect to choose from`,
+    example: `{
+  routes: [
+    ...DEFAULT_ROUTES,
+    MayanRoute,
+    nttRoutes(myNttConfig),
+  ]
+}`
+  },
+  {
+    key: 'chains',
+    description: `Whitelist of chains you want Connect to offer`,
+    example: `{
+  chains: ['Solana', 'Base', 'Polygon']
+}`
+
+  },
+  {
+    key: 'tokensConfig',
+    description: `Arbitrary tokens you want to add to Connect`,
+    example: `.`,
+  },
+];
+
+const CommonProperties = (props: { config: WormholeConnectConfig}) => {
+
+  return <Box>
+
+    <Typography variant="h6" >Common config properties</Typography>
+
+    {
+      COMMON_PROPERTIES.map((data) => <CommonProperty data={data} config={props.config} />)
+    }
+    </Box>
+}
+
+
+const CommonProperty = (props: { config: WormholeConnectConfig, data: CommonPropertyData }) => {
   const [open, setOpen] = useState(false);
   const styles = useStyles();
 
-  return <><Alert
-    severity="warning"
-    action={
-      <Button sx={{padding: '4px', marginLeft: '16px'}} onClick={() => { setOpen(!open) }} variant="outlined">{open ? 'Hide' : 'Show'} example</Button>
-    }
-  >
-    {props.text}
-  </Alert>
-  {
-    open ? <Editor
-      className={styles.classes.example}
-      value={props.example}
-      highlight={code => highlight(code, languages.js, 'js')}
-      onValueChange={() => {}}
-    /> : null
-  }
-  </> 
+  return (
+    <>
+      <Box display="flex" alignItems="center" margin="5px 0">
+        {props.config[props.data.key] !== undefined ?
+          <CheckIcon fontSize="small" color="success" /> :
+          <MoreHorizOutlinedIcon  fontSize="small" color="warning" />
+        }
+        <code className={styles.classes.smolCode}>{props.data.key}</code> - {props.data.description}
+
+        <Button sx={{marginLeft: 'auto', padding: '2px'}} onClick={() => setOpen(!open)}>Example</Button>
+
+      </Box>
+      {
+        open && <Editor
+          className={styles.classes.example}
+          value={props.data.example}
+          highlight={code => highlight(code, languages.js, 'js')}
+          onValueChange={() => {}}
+        /> 
+      }
+    </>
+  )
 };
-
-
-

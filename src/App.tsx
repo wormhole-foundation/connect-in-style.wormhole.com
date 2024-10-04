@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
 
-import { Box, Grid, Typography, Tabs, Tab } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 
+import Tab from './components/Tab';
 import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
 
 import WormholeConnect, { WormholeConnectConfig, WormholeConnectPartialTheme, dark } from '@wormhole-foundation/wormhole-connect';
 
-const WORMHOLE_PURPLE = 'rgb(192, 186, 245)';
+import { WORMHOLE_PURPLE } from './consts';
 
 const useStyles = makeStyles()(() => {
   return {
@@ -35,7 +36,7 @@ export default () => {
   const [config, setConfig] = useState<WormholeConnectConfig >({});
   const [nonce, setNonce] = useState(1);
 
-  const [editorTab, setEditorTab] = useState(0);
+  const [editorTab, setEditorTab] = useState<'config' | 'theme'>('config');
 
   const [theme, setTheme] = useState<WormholeConnectPartialTheme>(getInitialTheme());
 
@@ -56,7 +57,6 @@ export default () => {
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={6} >
-          <Typography color={WORMHOLE_PURPLE} marginLeft={1}>Preview</Typography>
           <Box className={styles.classes.wormbin} sx={{
             background: theme.mode === 'dark' ? 'black' : 'white'
           }}>
@@ -65,16 +65,13 @@ export default () => {
         </Grid>
         <Grid item xs={6}>
 
-          <Tabs value={editorTab} onChange={(_, v) => setEditorTab(v)}>
-            <Tab label="Config" id="editor-tab-0" />
-            <Tab label="Theme" id="editor-tab-1" />
-          </Tabs>
-
+          <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
+          <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
           
           <Box className={styles.classes.wormbin}>
 
             {
-              editorTab === 0 ?
+              editorTab === 'config' ?
               <ConfigEditor onChange={(config) => {
                 setConfig(config);
                 setNonce(nonce+1);
