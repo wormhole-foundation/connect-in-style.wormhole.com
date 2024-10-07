@@ -208,7 +208,22 @@ const COMMON_PROPERTIES: CommonPropertyData[] = [
   {
     key: 'tokensConfig',
     description: `Arbitrary tokens you want to add to Connect`,
-    example: `.`,
+    example: `{
+  tokensConfig: {
+    WIF: {
+      key: "WIF",
+      symbol: "WIF",
+      nativeChain: "Solana",
+      tokenId: {
+        chain: "Solana",
+        address: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+      },
+      icon: "https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum.ipfs.nftstorage.link",
+      coinGeckoId: "dogwifcoin",
+      decimals: 6,
+    }
+  }
+}`,
   },
 ];
 

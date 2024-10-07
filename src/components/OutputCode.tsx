@@ -86,7 +86,9 @@ const generateOutputCode = (config: WormholeConnectConfig, configCode: string, t
 wormholeConnectHosted(containerElement, { config, theme });`
   }
 
-return `import WormholeConnect, { ${packageImports.join(', ')} } from '@wormhole-foundation/wormhole-connect';
+return `import WormholeConnect, {
+  ${packageImports.join(', \n  ')}
+} from '@wormhole-foundation/wormhole-connect';
 
 const config: WormholeConnectConfig = ${configCode};
 const theme: WormholeConnectPartialTheme = ${themeCode};

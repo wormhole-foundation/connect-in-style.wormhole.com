@@ -88,7 +88,7 @@ export default () => {
             </Box>
           </Box>
 
-          <Box alignSelf="flex-end">
+          <Box>
             <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
             <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
 
