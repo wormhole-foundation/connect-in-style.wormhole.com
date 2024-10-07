@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import ColorPicker from './ColorPicker';
+import { ConnectTheme } from '../types';
 
 import {
+  WormholeConnectPartialTheme,
   dark,
   light,
-  WormholeConnectPartialTheme,
 } from '@wormhole-foundation/wormhole-connect';
 
 import { Radio, RadioGroup, FormControlLabel } from '@mui/material';
@@ -18,12 +19,13 @@ const loadCustomTheme = (mode: string) => {
   return JSON.parse(JSON.stringify((mode === 'customDark' ? dark : light)))
 }
 
-const saveCustomTheme = (mode: string, theme: WormholeConnectPartialTheme) => {
+const saveCustomTheme = (mode: string, theme: ConnectTheme) => {
   const key = `connect-editor:custom-theme-${mode}`;
   localStorage.setItem(key, JSON.stringify(theme));
 }
 
-export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void }) => {
+// 'DARK' and 'LIGHT' here refer to the built-in themes
+export default (props: { onChange: (theme: ConnectTheme) => void }) => {
   const [mode, setMode] = useState(localStorage.getItem('connect-editor:mode') ?? 'customDark');
   const [customDark, setCustomDark] = useState(loadCustomTheme('customDark'));
   const [customLight, setCustomLight] = useState(loadCustomTheme('customLight'));
@@ -39,11 +41,43 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
     return dark;
   };
 
+  const generateThemeCode = () => {
+    if (mode === 'dark') {
+      return 'DARK';
+    } else if (mode === 'light') {
+      return 'LIGHT';
+    } else {
+      const t = getTheme();
+      return {
+        mode: mode === 'customDark' ? 'dark' : 'light',
+        primary: {
+          '500': t.primary[500],
+        },
+        modal: {
+          background: t.modal.background,
+        },
+        background: {
+          badge: t.background.badge,
+        },
+        text: {
+          primary: t.text.primary,
+          secondary: t.text.secondary,
+        },
+        success: {
+          '500': t.success[500],
+        },
+        error: {
+          '500': t.error[500],
+        },
+      }
+    }
+  };
+
   useEffect(() => {
     if (mode === 'dark') {
-      setTheme(dark);
+      setTheme('DARK');
     } else if (mode === 'light') {
-      setTheme(light);
+      setTheme('LIGHT');
     } else if (mode === 'customDark') {
       setTheme(customDark);
     } else if (mode === 'customLight') {
@@ -54,8 +88,10 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
   useEffect(() => {
     const t = getTheme();
     t.background.default = 'transparent';
-    props.onChange(getTheme());
     saveCustomTheme(mode, getTheme());
+
+    /* @ts-ignore */
+    props.onChange(generateThemeCode());
   }, [getTheme()]);
 
   const updateThemeProperty = (mutation: (theme: WormholeConnectPartialTheme) => void) => {
@@ -68,8 +104,6 @@ export default (props: { onChange: (theme: WormholeConnectPartialTheme) => void 
     }
     setTheme(t);
   };
-
-  if (!getTheme().primary) debugger;
 
   return <>
     <RadioGroup

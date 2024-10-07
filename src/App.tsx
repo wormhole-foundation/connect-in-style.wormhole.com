@@ -8,7 +8,8 @@ import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
 import OutputCode from './components/OutputCode';
 
-import WormholeConnect, { WormholeConnectConfig, WormholeConnectPartialTheme, dark } from '@wormhole-foundation/wormhole-connect';
+import WormholeConnect, { WormholeConnectConfig, dark } from '@wormhole-foundation/wormhole-connect';
+import { ConnectTheme, OutputCodeType } from './types';
 
 import { WORMHOLE_PURPLE } from './consts';
 
@@ -39,9 +40,9 @@ export default () => {
   const [nonce, setNonce] = useState(1);
 
   const [editorTab, setEditorTab] = useState<'config' | 'theme'>('config');
-  const [outputCodeType, setOutputCodeType] = useState<'react' | 'hosted'>('react');
+  const [outputCodeType, setOutputCodeType] = useState<OutputCodeType>('react');
 
-  const [theme, setTheme] = useState<WormholeConnectPartialTheme>(getInitialTheme());
+  const [theme, setTheme] = useState<ConnectTheme>(getInitialTheme());
 
   /* @ts-ignore */
   const configWithCacheBust = useMemo(() => {
@@ -61,36 +62,39 @@ export default () => {
       <Grid container spacing={2}>
         <Grid item xs={6} >
           <Box className={styles.classes.wormbin} sx={{
-            background: theme.mode === 'dark' ? 'black' : 'white'
+            background: 'black'//theme.mode === 'dark' ? 'black' : 'white'
           }}>
             <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
           </Box>
         </Grid>
-        <Grid item xs={6}>
-
-          <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
-          <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
-          
-          <Box className={styles.classes.wormbin} marginBottom={2}>
-            {
-              editorTab === 'config' ?
-              <ConfigEditor onChange={(config, configCode) => {
-                setConfig(config);
-                setConfigCode(configCode);
-                setNonce(nonce+1);
-              }} /> :
-              <ThemeEditor onChange={(theme: WormholeConnectPartialTheme) => {
-                setTheme(theme);
-                localStorage.setItem('connect-editor:theme', JSON.stringify(theme));
-              }} />
-            }
+        <Grid item xs={6} display="flex" flexDirection="column" height="100%">
+          <Box>
+            <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
+            <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
+            
+            <Box className={styles.classes.wormbin} marginBottom={2}>
+              {
+                editorTab === 'config' ?
+                <ConfigEditor onChange={(config, configCode) => {
+                  setConfig(config);
+                  setConfigCode(configCode);
+                  setNonce(nonce+1);
+                }} /> :
+                <ThemeEditor onChange={(theme) => {
+                  setTheme(theme);
+                  localStorage.setItem('connect-editor:theme', JSON.stringify(theme));
+                }} />
+              }
+            </Box>
           </Box>
 
-          <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
-          <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
+          <Box alignSelf="flex-end">
+            <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
+            <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
 
-          <Box className={styles.classes.wormbin}>
-            <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
+            <Box className={styles.classes.wormbin}>
+              <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
+            </Box>
           </Box>
 
         </Grid>
