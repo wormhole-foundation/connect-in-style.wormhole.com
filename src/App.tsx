@@ -8,7 +8,7 @@ import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
 import OutputCode from './components/OutputCode';
 
-import WormholeConnect, { WormholeConnectConfig, dark } from '@wormhole-foundation/wormhole-connect';
+import WormholeConnect, { WormholeConnectConfig } from '@wormhole-foundation/wormhole-connect';
 import { ConnectTheme, OutputCodeType } from './types';
 
 import { WORMHOLE_PURPLE } from './consts';
@@ -28,7 +28,7 @@ const getInitialTheme = () => {
   if (cached) {
     return JSON.parse(cached);
   }
-  return dark;
+  return undefined;
 };
 
 export default () => {
