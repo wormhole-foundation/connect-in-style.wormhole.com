@@ -50,7 +50,7 @@ export default (props: { onChange: (theme: WormholeConnectTheme, bg: string) => 
     { serialize: JSON.stringify, deserialize: JSON.parse },
   );
   const [previewBgDark, setPreviewBgDark] = useCachedState<string>('connect-editor:preview-bg-dark', '#000000');
-  const [previewBgLight, setPreviewBgLight] = useCachedState<string>('connect-editor:preview-bg-dark', '#ffffff');
+  const [previewBgLight, setPreviewBgLight] = useCachedState<string>('connect-editor:preview-bg-light', '#ffffff');
 
   const [theme, previewBg] = useMemo(() => {
     switch (mode) {
