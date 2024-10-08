@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ColorPicker from './ColorPicker';
 
+import { useCachedState } from '../utils';
+
 import {
   WormholeConnectTheme,
 } from '@wormhole-foundation/wormhole-connect';
@@ -33,26 +35,19 @@ const DEFAULT_LIGHT: Required<WormholeConnectTheme> = {
   font: '"Inter", sans-serif'
 };
 
-const loadCustomtheme = (mode: 'customDark' | 'customLight'): Required<WormholeConnectTheme> => {
-  const key = `connect-editor:theme-${mode}`;
-  const cached = localStorage.getItem(key);
-  if (cached) {
-    return JSON.parse(cached);
-  }
-
-  return mode === 'customDark' ? DEFAULT_DARK : DEFAULT_LIGHT;
-}
-
-const saveCustomTheme = (mode: string, theme: WormholeConnectTheme) => {
-  const key = `connect-editor:theme-${mode}`;
-  localStorage.setItem(key, JSON.stringify(theme));
-}
-
 // 'DARK' and 'LIGHT' here refer to the built-in themes
 export default (props: { onChange: (theme: WormholeConnectTheme) => void }) => {
   const [mode, setMode] = useState(localStorage.getItem('connect-editor:mode') ?? 'customDark');
-  const [customDark, setCustomDark] = useState<Required<WormholeConnectTheme>>(loadCustomtheme('customDark'));
-  const [customLight, setCustomLight] = useState<Required<WormholeConnectTheme>>(loadCustomtheme('customLight'));
+  const [customDark, setCustomDark] = useCachedState<Required<WormholeConnectTheme>>(
+    'connect-editor:theme-customDark',
+    DEFAULT_DARK,
+    { serialize: JSON.stringify, deserialize: JSON.parse },
+  );
+  const [customLight, setCustomLight] = useCachedState<Required<WormholeConnectTheme>>(
+    'connect-editor:theme-customLight',
+    DEFAULT_LIGHT,
+    { serialize: JSON.stringify, deserialize: JSON.parse },
+  );
 
   const theme: WormholeConnectTheme = useMemo(() => {
     switch (mode) {
@@ -65,7 +60,6 @@ export default (props: { onChange: (theme: WormholeConnectTheme) => void }) => {
   }, [mode, customDark, customLight]);
 
   useEffect(() => {
-    saveCustomTheme(mode, theme);
     props.onChange(theme);
   }, [mode, customDark, customLight]);
 
