@@ -7,7 +7,7 @@ import {
   WormholeConnectTheme,
 } from '@wormhole-foundation/wormhole-connect';
 
-import { Radio, RadioGroup, FormControlLabel, Grid, Typography } from '@mui/material';
+import { Radio, RadioGroup, FormControlLabel, Grid, Typography, Input } from '@mui/material';
 
 const DEFAULT_DARK: Required<WormholeConnectTheme> = {
   mode: 'dark',
@@ -66,7 +66,7 @@ export default (props: { onChange: (theme: WormholeConnectTheme, bg: string) => 
     props.onChange(theme, isDark ? previewBgDark : previewBgLight);
   }, [mode, customDark, customLight, previewBgDark, previewBgLight]);
 
-  const updatethemeProperty = (mutation: (theme: WormholeConnectTheme) => void) => {
+  const updateThemeProperty = (mutation: (theme: WormholeConnectTheme) => void) => {
     const t = JSON.parse(JSON.stringify(theme));
     mutation(t);
     if (mode === 'customDark') {
@@ -78,32 +78,37 @@ export default (props: { onChange: (theme: WormholeConnectTheme, bg: string) => 
 
   const colorPickers = theme.primary !== undefined ? <>
     <ColorPicker id="primary" label="Primary" value={theme.primary} onChange={(val) =>
-      updatethemeProperty((t) => { t.primary = val })
+      updateThemeProperty((t) => { t.primary = val })
     } />
 
     <ColorPicker id="modal" label="Modal / Input" value={theme.input!} onChange={(val) =>
-      updatethemeProperty((t) => { t.input = val })
+      updateThemeProperty((t) => { t.input = val })
     } />
 
     <ColorPicker id="badges" label="Chain Badges" value={theme.badge!} onChange={(val) =>
-      updatethemeProperty((t) => { t.badge = val })
+      updateThemeProperty((t) => { t.badge = val })
     } />
 
     <ColorPicker id="textPrimary" label="Text (Primary)" value={theme.text!} onChange={(val) =>
-      updatethemeProperty((t) => { t.text = val })
+      updateThemeProperty((t) => { t.text = val })
     } />
 
     <ColorPicker id="textSecondary" label="Text (Secondary)" value={theme.textSecondary!} onChange={(val) =>
-      updatethemeProperty((t) => { t.textSecondary = val })
+      updateThemeProperty((t) => { t.textSecondary = val })
     } />
 
     <ColorPicker id="error" label="Success" value={theme.success!} onChange={(val) =>
-      updatethemeProperty((t) => { t.success = val })
+      updateThemeProperty((t) => { t.success = val })
     } />
 
     <ColorPicker id="error" label="Error" value={theme.error!} onChange={(val) =>
-      updatethemeProperty((t) => { t.error = val })
+      updateThemeProperty((t) => { t.error = val })
     } />
+
+    <Input value={theme.font} onChange={(e) => {
+      updateThemeProperty((t) => { t.font = e.target.value })
+    }} />
+    Font
   </> : null;
 
   return <>
