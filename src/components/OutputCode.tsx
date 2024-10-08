@@ -1,11 +1,11 @@
 import React  from 'react';
 import Editor from 'react-simple-code-editor';
-import { WormholeConnectConfig } from '@wormhole-foundation/wormhole-connect';
+import { WormholeConnectConfig, WormholeConnectTheme } from '@wormhole-foundation/wormhole-connect';
 import { highlight, languages } from 'prismjs';
 import { makeStyles } from 'tss-react/mui';
 import './editor.css'; //Example style, you can use another
 import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
-import { ConnectTheme, OutputCodeType } from '../types';
+import { OutputCodeType } from '../types';
 
 const useStyles = makeStyles()(() => {
   return {
@@ -22,7 +22,7 @@ const useStyles = makeStyles()(() => {
   }
 });
 
-export default (props: { config: WormholeConnectConfig, configCode: string, theme: ConnectTheme, type: OutputCodeType }) => {
+export default (props: { config: WormholeConnectConfig, configCode: string, theme: WormholeConnectTheme, type: OutputCodeType }) => {
   const styles = useStyles();
 
   return <>
@@ -50,14 +50,11 @@ const potentialImports = [
   'AutomaticTokenBridgeRoute',
 ];
 
-const generateOutputCode = (config: WormholeConnectConfig, configCode: string, theme: ConnectTheme, type: OutputCodeType): string => {
+const generateOutputCode = (config: WormholeConnectConfig, configCode: string, theme: WormholeConnectTheme, type: OutputCodeType): string => {
   configCode = configCode.replace(/\n$/,'');
 
   const packageImports: string[] = [];
   packageImports.push('WormholeConnectConfig', 'WormholeConnectPartialTheme');
-
-  if (type === 'hosted') {
-  }
 
   for (const imp of potentialImports) {
     if (configCode.includes(imp)) {
@@ -65,22 +62,11 @@ const generateOutputCode = (config: WormholeConnectConfig, configCode: string, t
     }
   }
 
-  let themeCode;
-  if (theme === 'DARK') {
-    packageImports.push('dark');
-    themeCode = 'dark';
-  } else if (theme === 'LIGHT') {
-    packageImports.push('light');
-    themeCode = 'light';
-  } else {
-    // Custom theme
-    themeCode = JSON.stringify(theme);
-  }
-
   let componentCode;
   if (type === 'react') {
     componentCode = '<WormholeConnect config={config} theme={theme} />';
   } else if (type === 'hosted') {
+    packageImports.push('wormholeConnectHosted');
     componentCode = `const containerElement = document.getElementById('bridge-container');
 
 wormholeConnectHosted(containerElement, { config, theme });`
@@ -91,7 +77,7 @@ return `import WormholeConnect, {
 } from '@wormhole-foundation/wormhole-connect';
 
 const config: WormholeConnectConfig = ${configCode};
-const theme: WormholeConnectPartialTheme = ${themeCode};
+const theme: WormholeConnectPartialTheme = ${JSON.stringify(theme)};
 
 ${componentCode}`
 }

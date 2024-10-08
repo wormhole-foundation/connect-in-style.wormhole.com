@@ -8,8 +8,10 @@ import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
 import OutputCode from './components/OutputCode';
 
-import WormholeConnect, { WormholeConnectConfig } from '@wormhole-foundation/wormhole-connect';
-import { ConnectTheme, OutputCodeType } from './types';
+import { useCachedState } from './utils';
+
+import WormholeConnect, { WormholeConnectConfig, WormholeConnectTheme } from '@wormhole-foundation/wormhole-connect';
+import { OutputCodeType } from './types';
 
 import { WORMHOLE_PURPLE } from './consts';
 
@@ -23,14 +25,6 @@ const useStyles = makeStyles()(() => {
   }
 });
 
-const getInitialTheme = () => {
-  const cached = localStorage.getItem('connect-editor:theme')
-  if (cached) {
-    return JSON.parse(cached);
-  }
-  return undefined;
-};
-
 export default () => {
 
   const styles = useStyles();
@@ -39,10 +33,13 @@ export default () => {
   const [configCode, setConfigCode] = useState<string >('{}');
   const [nonce, setNonce] = useState(1);
 
-  const [editorTab, setEditorTab] = useState<'config' | 'theme'>('config');
+  const [editorTab, setEditorTab] = useCachedState<'config' | 'theme'>('connect-editor:editor-tab', 'config');
   const [outputCodeType, setOutputCodeType] = useState<OutputCodeType>('react');
 
-  const [theme, setTheme] = useState<ConnectTheme>(getInitialTheme());
+  const [theme, setTheme] = useCachedState<WormholeConnectTheme>('connect-editor:theme', { mode: 'dark' }, {
+    serialize: JSON.stringify,
+    deserialize: JSON.parse,
+  });
 
   /* @ts-ignore */
   const configWithCacheBust = useMemo(() => {
@@ -80,10 +77,7 @@ export default () => {
                   setConfigCode(configCode);
                   setNonce(nonce+1);
                 }} /> :
-                <ThemeEditor onChange={(theme) => {
-                  setTheme(theme);
-                  localStorage.setItem('connect-editor:theme', JSON.stringify(theme));
-                }} />
+                <ThemeEditor onChange={setTheme} />
               }
             </Box>
           </Box>
@@ -96,7 +90,6 @@ export default () => {
               <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
             </Box>
           </Box>
-
         </Grid>
       </Grid>
     </Box>
