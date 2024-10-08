@@ -36,8 +36,9 @@ const DEFAULT_LIGHT: Required<WormholeConnectTheme> = {
 };
 
 // 'DARK' and 'LIGHT' here refer to the built-in themes
-export default (props: { onChange: (theme: WormholeConnectTheme) => void }) => {
+export default (props: { onChange: (theme: WormholeConnectTheme, bg: string) => void }) => {
   const [mode, setMode] = useState(localStorage.getItem('connect-editor:mode') ?? 'customDark');
+  const isDark = mode === 'dark' || mode === 'customDark';
   const [customDark, setCustomDark] = useCachedState<Required<WormholeConnectTheme>>(
     'connect-editor:theme-customDark',
     DEFAULT_DARK,
@@ -48,20 +49,22 @@ export default (props: { onChange: (theme: WormholeConnectTheme) => void }) => {
     DEFAULT_LIGHT,
     { serialize: JSON.stringify, deserialize: JSON.parse },
   );
+  const [previewBgDark, setPreviewBgDark] = useCachedState<string>('connect-editor:preview-bg-dark', '#000000');
+  const [previewBgLight, setPreviewBgLight] = useCachedState<string>('connect-editor:preview-bg-dark', '#ffffff');
 
-  const theme: WormholeConnectTheme = useMemo(() => {
+  const [theme, previewBg] = useMemo(() => {
     switch (mode) {
-      case 'dark': return { mode: 'dark' };
-      case 'light': return { mode: 'light' }
-      case 'customDark': return customDark;
-      case 'customLight': return customLight;
+      case 'dark': return [{ mode: 'dark' }, previewBgDark];
+      case 'light': return [{ mode: 'light' }, previewBgLight]
+      case 'customDark': return [customDark, previewBgDark];
+      case 'customLight': return [customLight, previewBgLight];
     }
-    return { mode: 'dark' }
+    return [{ mode: 'dark' }, previewBg]
   }, [mode, customDark, customLight]);
 
   useEffect(() => {
-    props.onChange(theme);
-  }, [mode, customDark, customLight]);
+    props.onChange(theme, isDark ? previewBgDark : previewBgLight);
+  }, [mode, customDark, customLight, previewBgDark, previewBgLight]);
 
   const updatethemeProperty = (mutation: (theme: WormholeConnectTheme) => void) => {
     const t = JSON.parse(JSON.stringify(theme));
@@ -143,9 +146,13 @@ export default (props: { onChange: (theme: WormholeConnectTheme) => void }) => {
         <Typography>
           Change to match your application:
         </Typography>
-        <ColorPicker id="error" label="Background Preview" value={theme.error!} onChange={(val) =>
-          updatethemeProperty((t) => { t.error = val })
-        } />
+        <ColorPicker id="error" label="Background Preview" value={isDark ? previewBgDark : previewBgLight} onChange={(val) => {
+          if (isDark) {
+            setPreviewBgDark(val);
+          } else {
+            setPreviewBgLight(val);
+          }
+        }} />
       </Grid>
     </Grid>
 

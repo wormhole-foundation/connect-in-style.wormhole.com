@@ -40,6 +40,7 @@ export default () => {
     serialize: JSON.stringify,
     deserialize: JSON.parse,
   });
+  const [previewBg, setPreviewBg] = useCachedState('connect-editor:previewBg', '#000000');
 
   /* @ts-ignore */
   const configWithCacheBust = useMemo(() => {
@@ -59,7 +60,7 @@ export default () => {
       <Grid container spacing={2}>
         <Grid item xs={6} >
           <Box className={styles.classes.wormbin} sx={{
-            background: 'black'//theme.mode === 'dark' ? 'black' : 'white'
+            background: previewBg,
           }}>
             <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
           </Box>
@@ -77,7 +78,10 @@ export default () => {
                   setConfigCode(configCode);
                   setNonce(nonce+1);
                 }} /> :
-                <ThemeEditor onChange={setTheme} />
+                  <ThemeEditor onChange={(theme, previewBg) => {
+                    setTheme(theme);
+                    setPreviewBg(previewBg);
+                  }} />
               }
             </Box>
           </Box>
