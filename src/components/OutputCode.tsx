@@ -54,7 +54,7 @@ const generateOutputCode = (config: WormholeConnectConfig, configCode: string, t
   configCode = configCode.replace(/\n$/,'');
 
   const packageImports: string[] = [];
-  packageImports.push('WormholeConnectConfig', 'WormholeConnectPartialTheme');
+  packageImports.push('WormholeConnectConfig', 'WormholeConnectTheme');
 
   for (const imp of potentialImports) {
     if (configCode.includes(imp)) {
@@ -79,7 +79,7 @@ return `import WormholeConnect, {
 } from '@wormhole-foundation/wormhole-connect';
 
 const config: WormholeConnectConfig = ${configCode};
-const theme: WormholeConnectPartialTheme = ${JSON.stringify(theme)};
+const theme: WormholeConnectTheme = ${JSON.stringify(theme)};
 
 ${componentCode}`
 }
