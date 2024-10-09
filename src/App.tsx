@@ -67,7 +67,11 @@ export default () => {
 
   /* @ts-ignore */
   const configWithCacheBust = useMemo(() => {
-    return { ...config, cacheBust: nonce }
+    if (!config.ui) config.ui = {};
+    config.ui!.previewMode = true;
+    /* @ts-ignore */
+    config.cacheBust = nonce;
+    return config;
   }, [config]);
 
   return (<>
