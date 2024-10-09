@@ -53,7 +53,7 @@ export default () => {
   const styles = useStyles();
 
   const [config, setConfig] = useState<WormholeConnectConfig >({});
-  const [configCode, setConfigCode] = useState<string >('{}');
+  const [configCode, setConfigCode] = useCachedState<string>('connect-editor:config-code', '{}');
   const [nonce, setNonce] = useState(1);
 
   const [editorTab, setEditorTab] = useCachedState<'config' | 'theme'>('connect-editor:editor-tab', 'config');
@@ -106,7 +106,7 @@ export default () => {
               <Box className={styles.classes.wormbin} marginBottom={2}>
                 {
                   editorTab === 'config' ?
-                  <ConfigEditor onChange={(config, configCode) => {
+                  <ConfigEditor code={configCode} onChange={(config, configCode) => {
                     setConfig(config);
                     setConfigCode(configCode);
                     setNonce(nonce+1);

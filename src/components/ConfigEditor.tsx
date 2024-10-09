@@ -13,8 +13,6 @@ import * as prettier from 'prettier';
 import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-const LOCAL_STORAGE_KEY = 'connect-editor:config-code';
-
 import {
   WormholeConnectConfig,
   buildConfig,
@@ -78,18 +76,16 @@ const formatCode = async (code): Promise<string> => {
   })
 }
 
-export default (props: { onChange: (config: WormholeConnectConfig, code: string) => void }) => {
+export default (props: { code: string, onChange: (config: WormholeConnectConfig, code: string) => void }) => {
   const [config, setConfig] = useState<WormholeConnectConfig>({});
-  const [configCode, setConfigCode] = useState('');
+  const [configCode, setConfigCode] = useState(props.code);
   const [editingConfig, setEditingConfig] = useState(false);
   const [loading, setLoading] = useState(true);
   const [configErr, setConfigErr] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const initialCode = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '{}';
-
-    formatCode(initialCode).then(setConfigCode).catch(() => {
-      setConfigCode(initialCode);
+    formatCode(props.code).then(setConfigCode).catch(() => {
+      setConfigCode(props.code);
     });
 
     setLoading(false);
@@ -132,10 +128,6 @@ export default (props: { onChange: (config: WormholeConnectConfig, code: string)
       setConfig(configEvaled);
       props.onChange(configEvaled, configCode);
       setConfigErr(undefined);
-
-      if (configCode !== '') {
-        localStorage.setItem(LOCAL_STORAGE_KEY, configCode);
-      }
     } catch (e: any) {
       setConfigErr(e.toString());
     }

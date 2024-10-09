@@ -64,7 +64,9 @@ const generateOutputCode = (config: WormholeConnectConfig, configCode: string, t
 
   let componentCode;
   if (type === 'react') {
-    componentCode = '<WormholeConnect config={config} theme={theme} />';
+    componentCode = `export default () => {
+  return <WormholeConnect config={config} theme={theme} />;
+}`;
   } else if (type === 'hosted') {
     packageImports.push('wormholeConnectHosted');
     componentCode = `const containerElement = document.getElementById('bridge-container');
