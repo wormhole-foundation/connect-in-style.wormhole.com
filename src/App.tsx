@@ -14,9 +14,9 @@ import Nav from './components/Nav';
 import { useCachedState } from './utils';
 
 import WormholeConnect, { WormholeConnectConfig, WormholeConnectTheme } from '@wormhole-foundation/wormhole-connect';
-import { OutputCodeType } from './types';
 
 import { WORMHOLE_PURPLE } from './consts';
+import {OutputCodeType} from 'types';
 
 const useStyles = makeStyles()(() => {
   return {
@@ -36,6 +36,9 @@ const useStyles = makeStyles()(() => {
     content: {
       maxWidth: '1440px',
       width: '100%'
+    },
+    header: {
+      margin: '40px 0',
     },
     logo: {
       display: 'inline-block',
@@ -70,8 +73,7 @@ export default () => {
     <Background />
     <Box className={styles.classes.root}>
       <Box className={styles.classes.content}>
-        <Box marginBottom={5}>
-
+        <Box className={styles.classes.header}>
           <Grid container spacing={2}>
             <Grid item md={12} lg={6} >
               <Typography variant="h5" component="h1" gutterBottom sx={{
