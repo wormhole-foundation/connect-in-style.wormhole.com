@@ -5,12 +5,13 @@ import './editor.css'; //Example style, you can use another
 import parserTypeScript from "prettier/plugins/typescript";
 import parserEstree from "prettier/plugins/estree";
 
-import { Box, Button, Typography  } from '@mui/material';
+import { Box, Button, Grid, Link, Typography  } from '@mui/material';
 import CheckBoxOutlineBlankOutlinedIcon from '@mui/icons-material/CheckBoxOutlineBlankOutlined';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 import { makeStyles } from 'tss-react/mui';
 import * as prettier from 'prettier';
 import { WORMHOLE_PURPLE_SUBTLE } from '../consts';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 const LOCAL_STORAGE_KEY = 'connect-editor:config-code';
 
@@ -159,11 +160,21 @@ export default (props: { onChange: (config: WormholeConnectConfig, code: string)
     >
     </Editor>
 
-    {
-      configErr ? 
-        <Typography margin="10px 0" variant="h6" color="error.main">{configErr}</Typography> :
-        <Typography margin="10px 0" variant="h6" color="success.main">Config is valid</Typography>
-    }
+    <Grid container spacing={2} display="flex" alignItems={"center"} >
+      <Grid item xs={6} >
+        {
+          configErr ?
+            <Typography margin="10px 0" variant="h6" color="error.main">{configErr}</Typography> :
+            <Typography margin="10px 0" variant="h6" color="success.main">Config is valid</Typography>
+        }
+      </Grid>
+      <Grid item xs={6} textAlign="right" >
+        <Link target="configdocs" padding="3px" href="https://wormhole.com/docs/build/applications/connect/configuration/" display="flex" alignItems="center" justifyContent={"end"}>
+          Full config documentation
+          <OpenInNewIcon fontSize="small" sx={{marginLeft: '6px'}} />
+        </Link>
+      </Grid>
+    </Grid>
 
     <CommonProperties config={config} />
   </>

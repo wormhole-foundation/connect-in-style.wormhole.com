@@ -7,6 +7,9 @@ import Tab from './components/Tab';
 import ThemeEditor from './components/ThemeEditor';
 import ConfigEditor from './components/ConfigEditor';
 import OutputCode from './components/OutputCode';
+import WormholeLogo from './components/Wormhole';
+import Background from './components/Background';
+import Nav from './components/Nav';
 
 import { useCachedState } from './utils';
 
@@ -21,6 +24,22 @@ const useStyles = makeStyles()(() => {
       padding: '20px',
       borderRadius: '10px',
       border: `1px solid ${WORMHOLE_PURPLE}`,
+      background: 'rgba(0,0,0,0.3)'
+    },
+    root: {
+      zIndex: 2,
+      padding: '20px',
+      display: 'flex',
+      justifyContent:'center',
+      width: '100%'
+    },
+    content: {
+      maxWidth: '1440px',
+      width: '100%'
+    },
+    logo: {
+      display: 'inline-block',
+      marginRight: '8px'
     }
   }
 });
@@ -47,55 +66,67 @@ export default () => {
     return { ...config, cacheBust: nonce }
   }, [config]);
 
-  return (
-    <Box padding={5}>
-      <Box marginBottom={5}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Wormhole Connect - Integrator Tool
-        </Typography>
-        <Typography>
-          Customize your theme and validate your config to tailor Wormhole Connect exactly to your needs.
-        </Typography>
+  return (<>
+    <Background />
+    <Box className={styles.classes.root}>
+      <Box className={styles.classes.content}>
+        <Box marginBottom={5}>
+
+          <Grid container spacing={2}>
+            <Grid item md={12} lg={6} >
+              <Typography variant="h5" component="h1" gutterBottom sx={{
+                fontWeight: 'bold'
+              }}>
+                <Box className={styles.classes.logo}><WormholeLogo /></Box> Connect - Integrator Tool
+              </Typography>
+              <Typography>
+                Validate your config and customize your theme to tailor Wormhole Connect exactly to your needs.
+              </Typography>
+            </Grid>
+            <Grid item md={12} lg={6} >
+              <Nav />
+            </Grid>
+          </Grid>
+        </Box>
+        <Grid container spacing={2}>
+          <Grid item md={12} lg={6} >
+            <Box className={styles.classes.wormbin} sx={{
+              background: previewBg + '!important',
+            }}>
+              <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
+            </Box>
+          </Grid>
+          <Grid item md={12} lg={6} display="flex" flexDirection="column" height="100%">
+            <Box>
+              <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
+              <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
+              <Box className={styles.classes.wormbin} marginBottom={2}>
+                {
+                  editorTab === 'config' ?
+                  <ConfigEditor onChange={(config, configCode) => {
+                    setConfig(config);
+                    setConfigCode(configCode);
+                    setNonce(nonce+1);
+                  }} /> :
+                    <ThemeEditor onChange={(theme, previewBg) => {
+                      setTheme(theme);
+                      setPreviewBg(previewBg);
+                    }} />
+                }
+              </Box>
+            </Box>
+
+            <Box>
+              <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
+              <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
+
+              <Box className={styles.classes.wormbin}>
+                <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
-      <Grid container spacing={2}>
-        <Grid item xs={6} >
-          <Box className={styles.classes.wormbin} sx={{
-            background: previewBg,
-          }}>
-            <WormholeConnect config={configWithCacheBust} theme={theme} key={nonce} />
-          </Box>
-        </Grid>
-        <Grid item xs={6} display="flex" flexDirection="column" height="100%">
-          <Box>
-            <Tab label="Config" selected={editorTab === 'config'} onClick={() => {setEditorTab('config')}} />
-            <Tab label="Theme" selected={editorTab === 'theme'} onClick={() => {setEditorTab('theme')}} />
-            
-            <Box className={styles.classes.wormbin} marginBottom={2}>
-              {
-                editorTab === 'config' ?
-                <ConfigEditor onChange={(config, configCode) => {
-                  setConfig(config);
-                  setConfigCode(configCode);
-                  setNonce(nonce+1);
-                }} /> :
-                  <ThemeEditor onChange={(theme, previewBg) => {
-                    setTheme(theme);
-                    setPreviewBg(previewBg);
-                  }} />
-              }
-            </Box>
-          </Box>
-
-          <Box>
-            <Tab label="React Integration" selected={outputCodeType === 'react'} onClick={() => {setOutputCodeType('react')}} />
-            <Tab label="Hosted Integration" selected={outputCodeType === 'hosted'} onClick={() => {setOutputCodeType('hosted')}} />
-
-            <Box className={styles.classes.wormbin}>
-              <OutputCode config={config} configCode={configCode} theme={theme} type={outputCodeType} />
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
     </Box>
-  );
+  </>);
 };
