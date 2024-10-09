@@ -27,7 +27,6 @@ const useStyles = makeStyles()(() => {
       background: 'rgba(0,0,0,0.3)'
     },
     root: {
-      zIndex: 2,
       padding: '20px',
       display: 'flex',
       justifyContent:'center',
@@ -35,7 +34,9 @@ const useStyles = makeStyles()(() => {
     },
     content: {
       maxWidth: '1440px',
-      width: '100%'
+      width: '100%',
+      position: 'absolute',
+      zIndex: 2,
     },
     header: {
       margin: '40px 0',
