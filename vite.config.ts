@@ -1,12 +1,12 @@
 import react from "@vitejs/plugin-react-swc";
 import checker from "vite-plugin-checker";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { nodePolyfills } from "@kev1n-peters/vite-plugin-node-polyfills";
 import dts from "vite-plugin-dts";
 import path from "path";
 
 const resolve = {
   alias: {
-    components: path.resolve(__dirname, "./src/components"),
+    components: path.resolve(__dirname, "./src/components")
   },
 };
 
