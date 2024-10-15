@@ -52,6 +52,7 @@ const potentialImports = [
 
 const generateOutputCode = (config: WormholeConnectConfig, configCode: string, theme: WormholeConnectTheme, type: OutputCodeType): string => {
   configCode = configCode.replace(/\n$/,'');
+  if (configCode === '') configCode = '{}';
 
   const packageImports: string[] = [];
   packageImports.push('WormholeConnectConfig', 'WormholeConnectTheme');
